@@ -28,9 +28,9 @@ def create_authn_request_url(authn_url, app_name, redirect_url):
         IsPassive="false", AssertionConsumerServiceURL=redirect_url)
 
     xml = ET.tostring(el, encoding='UTF-8')
-
+    import pdb;pdb.set_trace()
     return authn_url + '?' + urlencode({
-        'SAMLRequest': base64.encodebytes(deflate(xml))
+        'SAMLRequest': base64.encodebytes(xml)
     })
 
 
@@ -41,7 +41,7 @@ def create_logout_request_url(authn_url, app_name, username):
     xml = ET.tostring(el, encoding='UTF-8')
 
     return authn_url + '?' + urlencode({
-        'SAMLRequest': base64.encodebytes(deflate(xml))
+        'SAMLRequest': base64.encodebytes(xml)
     })
 
 
@@ -86,8 +86,7 @@ def gen_id():
 
 def epuap_login_required(app_name):
     def epuap_login_required_decorator(view):
-        def wrapper(request, *args, **kw):
-            import pdb;pdb.set_trace()
+        def wrapper(request, *args, **kwargs):
             if not "EPUAP" in request.session or request.session["EPUAP"].get("expires") < gen_ts() or 'epuap_force_auth' in request.GET:
                 if 'SAMLart' in request.GET:
                     resp = soap_call(SAML_ARTIFACT_SVC_URL, 'artifactResolve', create_artifact_resolve_xml(app_name, request.GET['SAMLart']))
@@ -101,9 +100,9 @@ def epuap_login_required(app_name):
                             "expires": assertion.xpath("saml:Conditions/@NotOnOrAfter", namespaces=ns)[0],
                         }
                         request.session["EPUAP"] = data
-                    return view(request, *args, **kw)
+                    return view(request, *args, **kwargs)
                 return http.HttpResponseRedirect(create_authn_request_url(AUTHN_URL, app_name, request.build_absolute_uri()))
-            return view(request, *args, **kw)
+            return view(request, *args, **kwargs)
         return wrapper
     return epuap_login_required_decorator
 
