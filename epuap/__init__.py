@@ -1,12 +1,14 @@
 import datetime
 import uuid
 import base64
-from urllib.parse import urlencode
-
 import requests
-from django import http
-from lxml import etree as ET
+
+from codecs import encode
+from urllib.parse import urlencode
 from lxml.builder import ElementMaker
+from lxml import etree as ET
+
+from django import http
 
 
 BASE_URL = 'https://hetman.epuap.gov.pl'
@@ -30,7 +32,7 @@ def create_authn_request_url(authn_url, app_name, redirect_url):
     xml = ET.tostring(el, encoding='UTF-8')
     import pdb;pdb.set_trace()
     return authn_url + '?' + urlencode({
-        'SAMLRequest': base64.encodebytes(xml)
+        'SAMLRequest': base64.encodebytes(deflate(xml))
     })
 
 
@@ -41,7 +43,7 @@ def create_logout_request_url(authn_url, app_name, username):
     xml = ET.tostring(el, encoding='UTF-8')
 
     return authn_url + '?' + urlencode({
-        'SAMLRequest': base64.encodebytes(xml)
+        'SAMLRequest': base64.encodebytes(deflate(xml))
     })
 
 
@@ -71,7 +73,7 @@ def soap_call(url, method, doc, requests_session = None):
 
 
 def deflate(data):
-    return data.encode("zlib")[2:-4]
+    return encode(data, "zlib")
 
 
 def gen_ts():
