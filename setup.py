@@ -11,8 +11,8 @@ setup(
     version='0.1',
     packages=['epuap'],
     install_requires=[
-        'lxml==3.4.1',
-        'requests==2.4.3',
+        'lxml==4.1.1',
+        'requests==2.18.4',
     ],
     include_package_data=True,
     long_description=README,
@@ -26,7 +26,6 @@ setup(
         'License :: OSI Approved :: Apache Software License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.5',
     ],
 )

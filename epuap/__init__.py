@@ -1,9 +1,10 @@
 import datetime
 import uuid
 import base64
-from urllib import urlencode
+from urllib.parse import urlencode
 
 import requests
+from django import http
 from lxml.builder import ElementMaker, ET
 
 BASE_URL = 'https://hetman.epuap.gov.pl'
@@ -17,6 +18,7 @@ NS_ENC = "http://schemas.xmlsoap.org/soap/encoding/"
 
 SEM = ElementMaker(namespace=NS_SAMLP, nsmap={'saml': NS_SAML, 'samlp': NS_SAMLP});
 
+
 def create_authn_request_url(authn_url, app_name, redirect_url):
 
     el = SEM('AuthnRequest', SEM('{%s}Issuer' % NS_SAML, app_name),
@@ -26,8 +28,9 @@ def create_authn_request_url(authn_url, app_name, redirect_url):
     xml = ET.tostring(el, encoding='UTF-8')
 
     return authn_url + '?' + urlencode({
-        'SAMLRequest': base64.encodestring(deflate(xml))
+        'SAMLRequest': base64.encodebytes(deflate(xml))
     })
+
 
 def create_logout_request_url(authn_url, app_name, username):
     el = SEM('LogoutRequest', SEM('{%s}Issuer' % NS_SAML, app_name), SEM('NameID', username),
@@ -36,7 +39,7 @@ def create_logout_request_url(authn_url, app_name, username):
     xml = ET.tostring(el, encoding='UTF-8')
 
     return authn_url + '?' + urlencode({
-        'SAMLRequest': base64.encodestring(deflate(xml))
+        'SAMLRequest': base64.encodebytes(deflate(xml))
     })
 
 
@@ -46,9 +49,11 @@ def create_artifact_resolve_xml(app_name, artifact):
         SEM('Artifact', artifact),
         ID=gen_id(), IssueInstant=gen_ts(), Version="2.0")
 
+
 def create_soap_env_xml(body):
     E = ElementMaker(namespace=NS_ENV, nsmap={'soap':NS_ENV});
     return E("Envelope", E("Body", body), {"{%s}encodingStyle" % NS_ENV: NS_ENC})
+
 
 def soap_call(url, method, doc, requests_session = None):
     msg = ET.tostring(create_soap_env_xml(doc), xml_declaration=True, encoding='UTF-8')
@@ -62,20 +67,23 @@ def soap_call(url, method, doc, requests_session = None):
 
 # utils
 
+
 def deflate(data):
     return data.encode("zlib")[2:-4]
 
+
 def gen_ts():
     return datetime.datetime.utcnow().isoformat() + "Z"
+
 
 def gen_id():
     return "_" + str(uuid.uuid4())
 
 # view decorator for Django
 
+
 def epuap_login_required(app_name):
     def epuap_login_required_decorator(view):
-        from django import http
         def wrapper(request, *args, **kw):
             import pdb;pdb.set_trace()
             if not "EPUAP" in request.session or request.session["EPUAP"].get("expires") < gen_ts() or 'epuap_force_auth' in request.GET:
