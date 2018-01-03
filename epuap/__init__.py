@@ -5,7 +5,9 @@ from urllib.parse import urlencode
 
 import requests
 from django import http
-from lxml.builder import ElementMaker, ET
+from lxml import etree as ET
+from lxml.builder import ElementMaker
+
 
 BASE_URL = 'https://hetman.epuap.gov.pl'
 AUTHN_URL = BASE_URL + '/DracoEngine2/draco.jsf'
