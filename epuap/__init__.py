@@ -77,6 +77,7 @@ def epuap_login_required(app_name):
     def epuap_login_required_decorator(view):
         from django import http
         def wrapper(request, *args, **kw):
+            import pdb;pdb.set_trace()
             if not "EPUAP" in request.session or request.session["EPUAP"].get("expires") < gen_ts() or 'epuap_force_auth' in request.GET:
                 if 'SAMLart' in request.GET:
                     resp = soap_call(SAML_ARTIFACT_SVC_URL, 'artifactResolve', create_artifact_resolve_xml(app_name, request.GET['SAMLart']))
