@@ -103,6 +103,8 @@ def epuap_login_required(app_name):
                         }
                         request.session["EPUAP"] = data
                     return view(request, *args, **kwargs)
+
+                import pdb;pdb.set_trace()
                 return http.HttpResponseRedirect(create_authn_request_url(AUTHN_URL, app_name, request.build_absolute_uri()))
             return view(request, *args, **kwargs)
         return wrapper
