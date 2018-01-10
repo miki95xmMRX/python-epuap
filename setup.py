@@ -11,6 +11,7 @@ setup(
     version='0.1',
     packages=['epuap'],
     install_requires=[
+        'Django==1.11.4',
         'lxml==4.1.1',
         'requests==2.18.4',
     ],
